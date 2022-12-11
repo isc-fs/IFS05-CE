@@ -1,10 +1,9 @@
-# Plantilla
 
 ![ISC Logo](http://iscracingteam.com/wp-content/uploads/2022/03/Picture5.jpg)
 
-# IFS05 - [department]
+# IFS05 - CONTROL ELECTRONICS
 
-Repositorio para el departamento de [department] del IFS05 de la temporada 2022/2023.
+Repositorio para el departamento de Control Electronics del IFS05 de la temporada 2022/2023.
 
 ## Primeros pasos:
 1. Crea una cuenta en GitHub si aún no tienes una.
@@ -17,5 +16,5 @@ Repositorio para el departamento de [department] del IFS05 de la temporada 2022/
     * Puede que quieras guardar una copia de [GitHub's Git Cheat Sheet](https://services.github.com/kit/downloads/github-git-cheat-sheet.pdf) como referencia.
     
 3. Clona este repositorio en tu ordenador utilizando las URLs:
-    * SSH: 
-    * HTTPS: 
+    * SSH: `git@github.com:isc-fs/IFS05-CE.git`
+    * HTTPS: `https://github.com/isc-fs/IFS05-CE.git`
