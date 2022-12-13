@@ -1,0 +1,32 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\variants\\mega"
+  },
+  {
+    "Sourcefile": "c:\\Users\\moran\\OneDrive - Universidad Pontificia Comillas\\UNI\\ICAI\\ISC RACING TEAM\\00_2022-2023\\03. Tests octubre 2022\\master_ecu\\build\\sketch\\master_ecu.ino.cpp",
+    "Include": "SPI.h",
+    "Includepath": "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\SPI\\src"
+  },
+  {
+    "Sourcefile": "c:\\Users\\moran\\OneDrive - Universidad Pontificia Comillas\\UNI\\ICAI\\ISC RACING TEAM\\00_2022-2023\\03. Tests octubre 2022\\master_ecu\\build\\sketch\\master_ecu.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "c:\\Users\\moran\\OneDrive - Universidad Pontificia Comillas\\UNI\\ICAI\\ISC RACING TEAM\\00_2022-2023\\03. Tests octubre 2022\\master_ecu\\build\\sketch\\mcp_can.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\libraries\\SPI\\src\\SPI.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]
