@@ -1,9 +1,17 @@
 #include <Arduino.h>
+#include "FlexCAN.h"
 
-void setup() {
-  // put your setup code here, to run once:
+
+
+void setup()
+{
+  // Inicializacion CAN0 y habilitación de interrupciones de recepción
+
+
+
 }
 
-void loop() {
+void loop()
+{
   // put your main code here, to run repeatedly:
 }
