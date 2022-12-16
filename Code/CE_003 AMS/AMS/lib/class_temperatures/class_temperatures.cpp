@@ -211,7 +211,7 @@ void Temperatures_MOD::Measure_Temp()
 void Temperatures_MOD::info(char *buffer)
 {
    error=0;
-  if(Serial){     // Send the message just if there is a serial por connected
+  if(Serial){     // Send the message just if there is a serial port connected
     Serial.println("\n***********************");
     Serial.println("         Temperatures");
     Serial.println("***********************");
