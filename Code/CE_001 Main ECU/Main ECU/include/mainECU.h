@@ -15,6 +15,7 @@
 #define CAN_INV_CS 4
 #define CAN_INV_INT 5
 #define CAN_INV_KBPS CAN_500KBPS
+#define N_DATOS_INV 5 
 
 // Conversiones inversor
 #define CONV_DC_BUS_VOLTAGE 55
@@ -41,6 +42,7 @@
 #define MODE 0x51 // Mode State
 #define I_FRG 0xE8 // Digital input RUN
 #define TORQUE 0x90
+
 // Telemetry data
 #define DC_BUS_VOLTAGE 0xEB // DC-Bus voltage
 #define I_ACTUAL 0X5F // Filtered actual current
