@@ -5,11 +5,13 @@
 
 // ---------- VARIABLES DEL CAN ----------
 
-// Mantener dos buses CAN con la posibilidad de reducir a uno solo
+// Mantener dos buses CAN
+// Añadir tercer bus CAN => 1 bus para real-time telemetry 1 bus para analytics
 // Crear una libreria de CAN propia
 
-FlexCAN_T4<CAN1> CAN_TEL; //CAN Telemetría
-FlexCAN_T4<CAN2> CAN_INV; //CAN Inversor
+FlexCAN_T4<CAN1> CAN_INV; //CAN Inversor
+FlexCAN_T4<CAN2> CAN_TEL_RT; //CAN Telemetría RT
+FlexCAN_T4<CAN3> CAN_TEL_AN; //CAN Telemetría AN
 
 /* 
 INT8U ext = 0; // CAN_EXTID = 0：Standard data frame, based on CAN 2.0A standard. ID range: 0 ~ 0x7FF
