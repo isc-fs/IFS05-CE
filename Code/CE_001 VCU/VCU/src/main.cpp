@@ -3,6 +3,10 @@
 #include "FlexCAN_T4.h"
 
 
+// ---------- MODOS DEBUG ----------
+#define DEBUG true
+
+
 // ---------- VARIABLES DEL CAN ----------
 
 // Mantener dos buses CAN
@@ -24,7 +28,8 @@ INT8U txBuf_inv[8] = {0,0,0,0,0,0,0,0}; // Buffer para transmitir por el CAN_INV
 INT32U rxID; // ID para recibir (único para todas las recepciones) */
 
 CAN_message_t msg_inv;
-CAN_message_t msg_tel;
+CAN_message_t msg_tel_rt;
+CAN_message_t msg_tel_an;
 
 // Datos a recibir del inversor
 INT32U datos_inversor[N_DATOS_INV] = {T_MOTOR,T_IGBT,T_AIR,N_ACTUAL,I_ACTUAL};
@@ -73,6 +78,8 @@ int count_T11_8_9=0;
 // ---------- VARIABLES DE CONTROL DEL TIEMPO ----------
 
 
+
+//  ---------- PLAUSABILITY CHECKS ----------
 /* unsigned long current_time; // Guarda el valor actual de millis()
 unsigned long previous_time_inv = 0;
 unsigned long previous_time_tel = 0;
@@ -81,7 +88,10 @@ int count_accel =0 ; */
 
 
 void setup() {
-  // put your setup code here, to run once:
+  if 
+  
+
+
 }
 
 void loop() {
