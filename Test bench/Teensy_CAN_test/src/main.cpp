@@ -3,6 +3,7 @@
 
 
 FlexCAN_T4<CAN1, RX_SIZE_128, TX_SIZE_64> can1;
+CAN_message_t msg;
 
 void setup()
 {
@@ -20,7 +21,7 @@ void loop()
 {
   // put your main code here, to run repeatedly:
 
-  CAN_message_t msg;
+  
 
   //Tx test
 
