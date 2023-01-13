@@ -6,7 +6,8 @@
 #include <Arduino.h>
 #include "mainECU.h"
 #include "FlexCAN_T4.h"
-#include "Chrono.h"
+#include "Metro.h"
+#include "sensors.h"
 
 // ---------- MODOS DEBUG ----------
 #define DEBUG true
@@ -82,7 +83,7 @@ int count_T11_8_9=0;
  */
 
 // ---------- VARIABLES DE CONTROL DEL TIEMPO ----------
-Chrono timer_send_torque_inverter = Chrono(200); //Enviar consigna de par al inversor cada 200ms
+Metro timer_send_torque_inverter = Metro(200); //Enviar consigna de par al inversor cada 200ms
   
 //  ---------- PLAUSABILITY CHECKS ----------
 /* unsigned long current_time; // Guarda el valor actual de millis()
@@ -409,6 +410,8 @@ void loop()
 
   // ---------- CONTROL DEL INVERSOR ----------
   if(timer_send_torque_inverter.check()){
+
+    
     
 
 
