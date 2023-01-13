@@ -6,6 +6,7 @@
 #include <Arduino.h>
 #include "mainECU.h"
 #include "FlexCAN_T4.h"
+#include "Chrono.h"
 
 // ---------- MODOS DEBUG ----------
 #define DEBUG true
@@ -52,7 +53,7 @@ int inv_t_igbt;         // Lectura de power stage temperature
 int inv_t_air;          // Lectura de air temperature
 int inv_n_actual;       // Lectura de speed actual value
 
-// Coche
+// Sensores
 int s1_aceleracion; // Lectura del sensor 1 del pedal de aceleración
 int s2_aceleracion; // Lectura del sensor 2 del pedal de aceleración
 float s1_aceleracion_aux;
@@ -81,7 +82,8 @@ int count_T11_8_9=0;
  */
 
 // ---------- VARIABLES DE CONTROL DEL TIEMPO ----------
-
+Chrono timer_send_torque_inverter = Chrono(200); //Enviar consigna de par al inversor cada 200ms
+  
 //  ---------- PLAUSABILITY CHECKS ----------
 /* unsigned long current_time; // Guarda el valor actual de millis()
 unsigned long previous_time_inv = 0;
@@ -397,9 +399,23 @@ void setup()
   msg_tel_an.buf[0] = 1;
   CAN_TEL_AN.write(msg_tel_an);
   delay(DELAY_CAN_SEND);
+
+  
+
 }
 
 void loop()
 {
-  // put your main code here, to run repeatedly:
+
+  // ---------- CONTROL DEL INVERSOR ----------
+  if(timer_send_torque_inverter.check()){
+    
+
+
+
+
+  }
 }
+
+
+
