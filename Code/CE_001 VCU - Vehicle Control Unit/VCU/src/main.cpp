@@ -7,7 +7,9 @@
 #include "mainECU.h"
 #include "FlexCAN_T4.h"
 #include "Metro.h"
-#include "sensors.h"
+
+
+inline void read_throtle_pedal();
 
 // ---------- MODOS DEBUG ----------
 #define DEBUG true
@@ -83,8 +85,8 @@ int count_T11_8_9=0;
  */
 
 // ---------- VARIABLES DE CONTROL DEL TIEMPO ----------
-Metro timer_send_torque_inverter = Metro(200); //Enviar consigna de par al inversor cada 200ms
-  
+Metro timer_send_torque_inverter = Metro(200); // Enviar consigna de par al inversor cada 200ms
+
 //  ---------- PLAUSABILITY CHECKS ----------
 /* unsigned long current_time; // Guarda el valor actual de millis()
 unsigned long previous_time_inv = 0;
@@ -400,25 +402,22 @@ void setup()
   msg_tel_an.buf[0] = 1;
   CAN_TEL_AN.write(msg_tel_an);
   delay(DELAY_CAN_SEND);
-
-  
-
 }
 
 void loop()
 {
 
   // ---------- CONTROL DEL INVERSOR ----------
-  if(timer_send_torque_inverter.check()){
+  if (timer_send_torque_inverter.check())
+  {
 
-    
-    
-
-
-
-
+    read_throtle_pedal();
   }
 }
 
+inline void read_throtle_pedal()
+{
 
-
+  s1_aceleracion = analogRead(S1_ACELERACION_PIN);
+  s2_aceleracion = analogRead(S2_ACELERACION_PIN);
+}
