@@ -8,7 +8,6 @@
 #include "FlexCAN_T4.h"
 #include "Metro.h"
 
-
 inline void read_throtle_pedal();
 
 // ---------- MODOS DEBUG ----------
@@ -411,13 +410,29 @@ void loop()
   if (timer_send_torque_inverter.check())
   {
 
-    read_throtle_pedal();
+    // Leemos sensores de posición del pedal de acelaración
+    s1_aceleracion = analogRead(S1_ACELERACION_PIN);
+    s2_aceleracion = analogRead(S2_ACELERACION_PIN);
+
+#if DEBUG
+    Serial.print("Sensor 1: ");
+    Serial.print(s1_aceleracion);
+    Serial.println("");
+    Serial.print("Sensor 2: ");
+    Serial.print(s2_aceleracion);
+    Serial.println("");
+#endif
+
+    // Leemos sensor de freno
+    s_freno = analogRead(S_FRENO_PIN);
+
+#if DEBUG
+    Serial.print("Sensor freno: ");
+    Serial.println(s_freno);
+#endif
+
+
+
+
   }
-}
-
-inline void read_throtle_pedal()
-{
-
-  s1_aceleracion = analogRead(S1_ACELERACION_PIN);
-  s2_aceleracion = analogRead(S2_ACELERACION_PIN);
 }
