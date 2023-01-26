@@ -12,20 +12,20 @@
 %% Connect to Arduino
 % Create arduino connection and add OneWire library
 
-a = arduino('Libraries', 'OneWire');
+a = arduino('COM3','UNO','Libraries', 'PaulStoffregen/OneWire');
 
 % Create a One-Wire object for the sensors connected on digital port 9
 
-temp_sens = addon(a, 'OneWire', 'D9'); % Returns the address of each sensor connected to this port
+temp_sens = addon(a, 'PaulStoffregen/OneWire', 'D9'); % Returns the address of each sensor connected to this port
 
-
+temp_addr = temp_sens.AvailableAddresses{1};
 
 % Reset the device before any operation
 reset(temp_sens);
 
 % Start temperature measure and conversion
 
-write(temp_sens,hex2dec('44'), false);
+write(temp_sens, temp_addr, hex2dec('44'), true);
 
 %% Take a single temperature measurement
 
@@ -33,11 +33,11 @@ write(temp_sens,hex2dec('44'), false);
 % there´s any error
 
 reset(temp_sens);
-write(temp_sens,hex2dec('BE')); 
-temp_data = read(temp_sens,9);
-temp_crc = data(9);
+write(temp_sens, temp_addr, hex2dec('BE')); 
+temp_data = read(temp_sens, temp_addr, 9);
+temp_crc = temp_data(9);
 
-sprintf('Data -  %x %x %x %x %x %x %x %x  CRC = %x\n', temp_data(1), temp_data(2), temp_data(3), temp_data(4), temp_data(5), temp_data(6), temp_data(7), temp_data(8), crc)
+sprintf('Data -  %x %x %x %x %x %x %x %x  CRC = %x\n', temp_data(1), temp_data(2), temp_data(3), temp_data(4), temp_data(5), temp_data(6), temp_data(7), temp_data(8), temp_crc)
 
 if ~checkCRC(temp_sens, temp_data(1:8), temp_crc, 'crc8')
     error('Invalid data read.');
@@ -64,7 +64,7 @@ temp_raw = typecast(uint16(temp_raw), 'int16');
 
 % Convert to the actual floating point value
 temp_celsius = double(temp_raw) / 16.0;
-sprintf('Temperature - %.4f (\circC)', temp_celsius);
+sprintf('Temperature -> %.4f Celsius', temp_celsius)
 
 
 
@@ -77,10 +77,11 @@ t = zeros(1e4,1);
 tic
 while toc < 10
     ii = ii + 1;
-   
     reset(temp_sens);
-    write(temp_sens,hex2dec('BE')); 
-    temp_data = read(temp_sens,9);
+    write(temp_sens, temp_addr, hex2dec('44'), true);
+    reset(temp_sens);
+    write(temp_sens, temp_addr, hex2dec('BE')); 
+    temp_data = read(temp_sens, temp_addr, 9);
     temp_raw = bitshift(temp_data(2),8)+temp_data(1);
     temp_raw = typecast(uint16(temp_raw), 'int16');
 
@@ -92,11 +93,11 @@ end
 
 % Post-process and plot the data. First remove any excess zeros on the
 % logging variables.
-TempF = TempF(1:ii);
+TempC = TempC(1:ii);
 t = t(1:ii);
 % Plot temperature versus time
 figure
-plot(t,TempC,'-o')
+plot(t,TempC,'-*')
 xlabel('Elapsed time (sec)')
 ylabel('Temperature (\circC)')
 title('Ten Seconds of Temperature Data')
@@ -117,15 +118,16 @@ figure
 h = animatedline;
 ax = gca;
 ax.YGrid = 'on';
-ax.YLim = [20 70];
+ax.YLim = [20 50];
 
 stop = false;
 startTime = datetime('now');
 while ~stop
-
     reset(temp_sens);
-    write(temp_sens,hex2dec('BE')); 
-    temp_data = read(temp_sens,9);
+    write(temp_sens, temp_addr, hex2dec('44'), true);
+    reset(temp_sens);
+    write(temp_sens, temp_addr, hex2dec('BE')); 
+    temp_data = read(temp_sens, temp_addr, 9);
     temp_raw = bitshift(temp_data(2),8)+temp_data(1);
     temp_raw = typecast(uint16(temp_raw), 'int16');
     temp_celsius = double(temp_raw) / 16.0;
@@ -138,7 +140,7 @@ while ~stop
     datetick('x','keeplimits')
     drawnow
     % Check stop condition (push button)
-    stop = readDigitalPin(a,'D12');
+    stop = 0;
 end
 
 %% Plot the recorded data
