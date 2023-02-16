@@ -9,23 +9,35 @@
 %  Add-On
 % -----------------------------------------------------------------------------
 
+clear all;
+clc;
+
 %% Connect to Arduino
 % Create arduino connection and add OneWire library
 
-a = arduino('COM3','UNO','Libraries', 'PaulStoffregen/OneWire');
+% a = arduino('COM3','UNO','Libraries', 'PaulStoffregen/OneWire');
+
+a = arduino("COM4","Mega2560",'Libraries','PaulStoffregen/OneWire')
 
 % Create a One-Wire object for the sensors connected on digital port 9
 
 temp_sens = addon(a, 'PaulStoffregen/OneWire', 'D9'); % Returns the address of each sensor connected to this port
 
-temp_addr = temp_sens.AvailableAddresses{1};
+% temp_addr = temp_sens.AvailableAddresses{1};
+
+temp_addr= temp_sens.AvailableAddresses
 
 % Reset the device before any operation
 reset(temp_sens);
 
 % Start temperature measure and conversion
+i = 1;
+while i < 25
+    write(temp_sens, temp_addr{i}, hex2dec('44'), true);
+    i = i + 1;
 
-write(temp_sens, temp_addr, hex2dec('44'), true);
+end
+
 
 %% Take a single temperature measurement
 
@@ -33,11 +45,15 @@ write(temp_sens, temp_addr, hex2dec('44'), true);
 % there´s any error
 
 reset(temp_sens);
-write(temp_sens, temp_addr, hex2dec('BE')); 
-temp_data = read(temp_sens, temp_addr, 9);
-temp_crc = temp_data(9);
 
-sprintf('Data -  %x %x %x %x %x %x %x %x  CRC = %x\n', temp_data(1), temp_data(2), temp_data(3), temp_data(4), temp_data(5), temp_data(6), temp_data(7), temp_data(8), temp_crc)
+i = 1;
+while i<25
+    write(temp_sens, temp_addr{i}, hex2dec('BE')); 
+    temp_data{i} = read(temp_sens, temp_addr{i}, 9);
+    temp_crc{i} = temp_data(9);
+    i = i + 1;
+end
+%fprintf('Data -  %x %x %x %x %x %x %x %x  CRC = %x\n', temp_data(i,1), temp_data(i,2), temp_data(i,3), temp_data(i,4), temp_data(i,5), temp_data(i,6), temp_data(i,7), temp_data(i,8), temp_crc)
 
 if ~checkCRC(temp_sens, temp_data(1:8), temp_crc, 'crc8')
     error('Invalid data read.');
