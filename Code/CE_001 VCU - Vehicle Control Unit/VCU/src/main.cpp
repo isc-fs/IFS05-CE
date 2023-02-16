@@ -78,14 +78,13 @@ int torque_limitado;
 int media_s_acel;
 
 // Revisar normativa
-/* int flag_EV_2_3=0;
-int flag_T11_8_9=0;
-int count_T11_8_9=0;
- */
+int flag_EV_2_3 = 0;
+int flag_T11_8_9 = 0;
+int count_T11_8_9 = 0;
 
 // ---------- VARIABLES DE CONTROL DEL TIEMPO ----------
 Metro timer_send_torque_inverter = Metro(200); // Enviar consigna de par al inversor cada 200ms
-
+Metro timer_send_telemetry = Metro(200);       // Enviar telemetría
 //  ---------- PLAUSABILITY CHECKS ----------
 /* unsigned long current_time; // Guarda el valor actual de millis()
 unsigned long previous_time_inv = 0;
@@ -349,7 +348,14 @@ void setup()
     msg_inv.len = 3;
     msg_inv.buf[0] = READ;
     msg_inv.buf[1] = datos_inversor[i];
-    msg_inv.buf[2] = 0xFA; // Delay: 1 - 254 (0xEF) ms --> 0xFF para parar
+    if (datos_inversor[i] == N_ACTUAL)
+    {
+      msg_inv.buf[2] = 0x32;  //50ms para rpm del motor
+    }
+    else
+    {
+      msg_inv.buf[2] = 0x64; // 100ms Delay: 1 - 254 (0xEF) ms --> 0xFF para parar
+    }
     CAN_INV.write(msg_inv);
     delay(15);
   }
@@ -431,8 +437,105 @@ void loop()
     Serial.println(s_freno);
 #endif
 
+    // Ajustar sensores de la posicion del acelerador
 
+    s1_aceleracion_aux = (s1_aceleracion - 294.0) / (10.23 - 2.94);
+    s2_aceleracion_aux = (s2_aceleracion - 29) / (7.87 - 0.29);
 
+#if DEBUG
+    Serial.print("Sensor % 1: ");
+    Serial.print(s1_aceleracion_aux);
+    Serial.println("");
+    Serial.print("Sensor % 2: ");
+    Serial.print(s2_aceleracion_aux);
+    Serial.println("");
+#endif
 
+    // Calcular el torque como la media de los dos sensores
+
+    torque_total = (s1_aceleracion_aux + s2_aceleracion_aux) / 2;
+
+    // Por debajo de un 10% no acelera y por encima de un 90% esta a tope
+    if (torque_total < 10)
+    {
+      torque_total = 0;
+    }
+    else if (torque_total > 90)
+    {
+      torque_total = 100;
+    }
+
+    //
+    if (s1_aceleracion_aux > 7.1 && s2_aceleracion_aux > 12 && s1_aceleracion_aux < 8.6 && s2_aceleracion_aux < 20)
+    {
+      torque_total = 0;
+    }
+
+    // Comprobamos EV 2.3 APPS/Brake Pedal Plausibility Check
+    // En caso de que se esté pisando el freno y mas de un 25% del pedal para. Se resetea
+    // solo si el acelerador vuelve por debajo del 5%
+    if (s_freno > UMBRAL_FRENO && torque_total > 25)
+    {
+      flag_EV_2_3 = 1;
+    }
+    else if (s_freno < UMBRAL_FRENO && torque_total < 5)
+    {
+      flag_EV_2_3 = 0;
+    }
+
+    // T11.8.9 Implausibility is defined as a deviation of more than ten percentage points
+    // pedal travel between any of the used APPSs
+    if (abs(s1_aceleracion_aux - s2_aceleracion_aux) > 10)
+    {
+      count_T11_8_9 = count_T11_8_9 + 1;
+      if (count_T11_8_9 * periodo_inv > 100)
+      {
+        flag_T11_8_9 = 1;
+      }
+    }
+    else
+    {
+      count_T11_8_9 = 0;
+      flag_T11_8_9 = 0;
+    }
+
+    if (flag_EV_2_3 || flag_T11_8_9)
+    {
+      torque_total = 0;
+    }
+#if DEBUG
+    Serial.print("Torque total solicitado: ");
+    Serial.println(torque_total);
+#endif
+
+    // Limitación del torque en función de la carga
+    if (v_celda_min < 3500)
+    {
+      if (v_celda_min > 2800)
+      {
+        torque_limitado = torque_total * (1.357 * v_celda_min - 3750) / 1000;
+      }
+      else
+      {
+        torque_limitado = torque_total * 0.05;
+      }
+    }
+    else
+    {
+      torque_limitado = torque_total;
+    }
+
+#if DEBUG
+    Serial.print("Torque limitado en: ");
+    Serial.println(torque_limitado);
+#endif
+    // Enviamos torque
+
+    msg_inv.id = rxID_inversor;
+    msg_inv.len = 3;
+    msg_inv.buf[0] = TORQUE;
+    msg_inv.buf[1] = ((int)(torque_limitado * 32767.0 / 100.0)) & 0xFF;
+    msg_inv.buf[2] = ((int)(torque_limitado * 32767.0 / 100.0)) >> 8;
+    CAN_INV.write(msg_inv);
   }
 }
