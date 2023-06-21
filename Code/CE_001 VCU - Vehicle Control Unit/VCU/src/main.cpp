@@ -19,9 +19,9 @@ inline void read_throtle_pedal();
 // Añadir tercer bus CAN => 1 bus para real-time telemetry 1 bus para analytics
 // Crear una libreria de CAN propia
 
-FlexCAN_T4<CAN1> CAN_INV;    // CAN Inversor
-FlexCAN_T4<CAN2> CAN_TEL_RT; // CAN Telemetría RT
-FlexCAN_T4<CAN3> CAN_TEL_AN; // CAN Telemetría AN
+FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> CAN_INV;    // CAN Inversor
+FlexCAN_T4<CAN2, RX_SIZE_256, TX_SIZE_16> CAN_TEL; // CAN Telemetría RT
+FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> CAN_TEL_AN; // CAN Telemetría AN
 
 /*
 INT8U ext = 0; // CAN_EXTID = 0：Standard data frame, based on CAN 2.0A standard. ID range: 0 ~ 0x7FF
@@ -117,8 +117,11 @@ void setup()
   // Inicializarción de los buses CAN
 
   CAN_INV.begin();
-  CAN_TEL_RT.begin();
+  CAN_TEL.begin();
   CAN_TEL_AN.begin();
+  CAN_INV.setBaudRate(250000);
+  CAN_TEL.setBaudRate(250000);
+  CAN_TEL_AN.setBaudRate(250000);
 
   // ---------- SECUENCIA DE ARRANQUE ----------
 

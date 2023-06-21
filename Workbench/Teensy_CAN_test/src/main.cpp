@@ -1,48 +1,43 @@
-#include <Arduino.h>
-#include "FlexCAN_T4.h"
+#include <FlexCAN_T4.h>
 
+FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> myCan1;
+FlexCAN_T4<CAN2, RX_SIZE_256, TX_SIZE_16> myCan2;
+FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> myCan3;
 
-FlexCAN_T4<CAN1, RX_SIZE_128, TX_SIZE_64> can1;
-CAN_message_t msg;
-
-void setup()
-{
-  Serial.begin(115200);
-
-  can1.begin();
-  can1.setBaudRate(250000);
-  //can1.setMBFilter(ACCEPT_ALL);
-  //can1.distribute();
-  //can1.mailboxStatus();
-
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(LED_BUILTIN, OUTPUT);          // added to show loop() activity
+  myCan1.begin();
+  myCan2.begin();
+  myCan3.begin();
+  myCan1.setBaudRate(250 * 1000);
+  myCan2.setBaudRate(250 * 1000);
+  myCan3.setBaudRate(250 * 1000);
 }
 
-void loop()
-{
+void loop() {
   // put your main code here, to run repeatedly:
+  digitalToggle(LED_BUILTIN);          // added to show loop() activity
+  CAN_message_t msg;
+  msg.len = 8;
+  msg.id = 1;
+  msg.buf[0] = 1;
+  msg.buf[1] = 2;
+  msg.buf[2] = 3;
+  msg.buf[3] = 4;
+  msg.buf[4] = 5;
+  msg.buf[5] = 6;
+  msg.buf[6] = 7;
+  msg.buf[7] = 8;
 
-  Serial.println("ISC");
-
-  //Tx test
-
-/*   msg.len = 8; msg.id = 0x321;
-  msg.buf[0] = 1; msg.buf[1] = 2; msg.buf[2] = 3; msg.buf[3] = 4;
-  msg.buf[4] = 5; msg.buf[5] = 6; msg.buf[6] = 7; msg.buf[7] = 8;
-  CAN0.write(msg); */
-
-    //Rx test
-    
-  if (can1.read(msg) ) {
-    Serial.print("  ID: 0x"); Serial.print(msg.id, HEX );
-    Serial.print("  EXT: "); Serial.print(msg.flags.extended );
-    Serial.print("  LEN: "); Serial.print(msg.len);
-    Serial.print(" DATA: ");
-    for ( uint8_t i = 0; i < 8; i++ ) {
-      Serial.print(msg.buf[i]); Serial.print(" ");
-    }
-    Serial.print("  TS: "); Serial.println(msg.timestamp);
+  if(myCan1.write(msg)==1){
+    Serial.println("Enviado");
   }
 
-  delay(200);
-}
+  msg.id = 2;
+  myCan2.write(msg);
 
+  msg.id = 3;
+  myCan3.write(msg);
+  delay (500);
+}
