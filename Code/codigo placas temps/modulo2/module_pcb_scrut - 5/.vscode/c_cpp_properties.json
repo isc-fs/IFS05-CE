@@ -1,0 +1,76 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/include",
+                "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/src",
+                "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/module_state_machine",
+                "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/class_temp0",
+                "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/DallasTemperature",
+                "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/OneWire",
+                "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/module_can",
+                "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/mcp_can",
+                "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/SPI/src",
+                "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/cores/MiniCore",
+                "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/variants/standard",
+                "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/107-Arduino-MCP2515/src",
+                "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/AVR_examples/src",
+                "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/EEPROM/src",
+                "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/Optiboot_flasher/src",
+                "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/SPI1/src",
+                "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/SoftwareSerial/src",
+                "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/Wire/src",
+                "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/Wire1/src",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/include",
+                    "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/src",
+                    "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/module_state_machine",
+                    "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/class_temp0",
+                    "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/DallasTemperature",
+                    "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/OneWire",
+                    "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/module_can",
+                    "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/mcp_can",
+                    "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/SPI/src",
+                    "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/cores/MiniCore",
+                    "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/variants/standard",
+                    "C:/Users/canib/OneDrive/Desktop/Version 2 temps/module_pcb_scrut - 5/lib/107-Arduino-MCP2515/src",
+                    "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/AVR_examples/src",
+                    "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/EEPROM/src",
+                    "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/Optiboot_flasher/src",
+                    "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/SPI1/src",
+                    "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/SoftwareSerial/src",
+                    "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/Wire/src",
+                    "C:/Users/canib/.platformio/packages/framework-arduino-avr-minicore/libraries/Wire1/src",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=60107",
+                "ARDUINO_AVR_ATmega328",
+                "F_CPU=16000000L",
+                "ARDUINO_ARCH_AVR",
+                "ARDUINO=10808",
+                "__AVR_ATmega328__",
+                ""
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "compilerPath": "C:/Users/canib/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
+            "compilerArgs": [
+                "-mmcu=atmega328",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}
