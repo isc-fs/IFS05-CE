@@ -1,7 +1,9 @@
+
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#define N_SENSORES 1
+#define N_SENSORES 24
 
 // Pin donde se conecta el bus 1-Wire
 const int pinDatosDQ = 9;

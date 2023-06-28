@@ -76,14 +76,22 @@ int torque_total;
 int torque_limitado;
 int media_s_acel;
 
+<<<<<<< HEAD
 // ------------ IMPLAUSIBILITIES --------------------
+=======
+// Revisar normativa
+>>>>>>> 7f4e89bc202dfb304cf35f52a291d65cef83b9dc
 int flag_EV_2_3 = 0;
 int flag_T11_8_9 = 0;
 int count_T11_8_9 = 0;
 
 // ---------- VARIABLES DE CONTROL DEL TIEMPO ----------
 Metro timer_send_torque_inverter = Metro(200); // Enviar consigna de par al inversor cada 200ms
+<<<<<<< HEAD
 Metro timer_send_telemetry = Metro(400);       // Enviar telemetría por el bus
+=======
+Metro timer_send_telemetry = Metro(200);       // Enviar telemetría
+>>>>>>> 7f4e89bc202dfb304cf35f52a291d65cef83b9dc
 //  ---------- PLAUSABILITY CHECKS ----------
 /* unsigned long current_time; // Guarda el valor actual de millis()
 unsigned long previous_time_inv = 0;
@@ -345,7 +353,14 @@ void setup()
     msg_inv.len = 3;
     msg_inv.buf[0] = READ;
     msg_inv.buf[1] = datos_inversor[i];
-    msg_inv.buf[2] = 0xFA; // Delay: 1 - 254 (0xEF) ms --> 0xFF para parar
+    if (datos_inversor[i] == N_ACTUAL)
+    {
+      msg_inv.buf[2] = 0x32;  //50ms para rpm del motor
+    }
+    else
+    {
+      msg_inv.buf[2] = 0x64; // 100ms Delay: 1 - 254 (0xEF) ms --> 0xFF para parar
+    }
     CAN_INV.write(msg_inv);
     delay(15);
   }
@@ -427,12 +442,21 @@ void loop()
     Serial.println(s_freno);
 #endif
 
+<<<<<<< HEAD
     // Calculamos % torque  en función de la posición de los sensores
     s1_aceleracion_aux = (s1_aceleracion - 74) / (6.73 - 0.74);
     s2_aceleracion_aux = (s2_aceleracion - 25) / (6.83 - 0.25);
 
 #if DEBUG
 
+=======
+    // Ajustar sensores de la posicion del acelerador
+
+    s1_aceleracion_aux = (s1_aceleracion - 294.0) / (10.23 - 2.94);
+    s2_aceleracion_aux = (s2_aceleracion - 29) / (7.87 - 0.29);
+
+#if DEBUG
+>>>>>>> 7f4e89bc202dfb304cf35f52a291d65cef83b9dc
     Serial.print("Sensor % 1: ");
     Serial.print(s1_aceleracion_aux);
     Serial.println("");
@@ -441,7 +465,12 @@ void loop()
     Serial.println("");
 #endif
 
+<<<<<<< HEAD
     // Torque enviado es la media de los dos sensores
+=======
+    // Calcular el torque como la media de los dos sensores
+
+>>>>>>> 7f4e89bc202dfb304cf35f52a291d65cef83b9dc
     torque_total = (s1_aceleracion_aux + s2_aceleracion_aux) / 2;
 
     // Por debajo de un 10% no acelera y por encima de un 90% esta a tope
@@ -454,11 +483,19 @@ void loop()
       torque_total = 100;
     }
 
+<<<<<<< HEAD
     // Revisar
     /*     if (s1_aceleracion_aux > 7.1 && s2_aceleracion_aux > 12 && s1_aceleracion_aux < 8.6 && s2_aceleracion_aux < 20)
         {
           torque_total = 0;
         } */
+=======
+    //
+    if (s1_aceleracion_aux > 7.1 && s2_aceleracion_aux > 12 && s1_aceleracion_aux < 8.6 && s2_aceleracion_aux < 20)
+    {
+      torque_total = 0;
+    }
+>>>>>>> 7f4e89bc202dfb304cf35f52a291d65cef83b9dc
 
     // Comprobamos EV 2.3 APPS/Brake Pedal Plausibility Check
     // En caso de que se esté pisando el freno y mas de un 25% del pedal para. Se resetea
@@ -492,12 +529,18 @@ void loop()
     {
       torque_total = 0;
     }
+<<<<<<< HEAD
 
 #if DEBUG
 
     Serial.print("Torque total solicitado: ");
     Serial.println(torque_total);
 
+=======
+#if DEBUG
+    Serial.print("Torque total solicitado: ");
+    Serial.println(torque_total);
+>>>>>>> 7f4e89bc202dfb304cf35f52a291d65cef83b9dc
 #endif
 
     // Limitación del torque en función de la carga
@@ -520,14 +563,20 @@ void loop()
 #if DEBUG
     Serial.print("Torque limitado en: ");
     Serial.println(torque_limitado);
+<<<<<<< HEAD
 
 #endif
 
     // Envío de torque al inversor
+=======
+#endif
+    // Enviamos torque
+>>>>>>> 7f4e89bc202dfb304cf35f52a291d65cef83b9dc
 
     msg_inv.id = rxID_inversor;
     msg_inv.len = 3;
     msg_inv.buf[0] = TORQUE;
+<<<<<<< HEAD
     msg_inv.buf[1] = ((int)(torque_limitado * 32767.0 / 100.0)) & 0xFF; // bits del 0-7
     msg_inv.buf[2] = ((int)(torque_limitado * 32767.0 / 100.0)) >> 8;   // bits del 8-15
     CAN_INV.write(msg_inv);
@@ -615,5 +664,10 @@ void loop()
         }
       }
     }
+=======
+    msg_inv.buf[1] = ((int)(torque_limitado * 32767.0 / 100.0)) & 0xFF;
+    msg_inv.buf[2] = ((int)(torque_limitado * 32767.0 / 100.0)) >> 8;
+    CAN_INV.write(msg_inv);
+>>>>>>> 7f4e89bc202dfb304cf35f52a291d65cef83b9dc
   }
 }
