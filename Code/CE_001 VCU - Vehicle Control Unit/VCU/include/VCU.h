@@ -9,29 +9,33 @@
 // CAN Telemetría config
 #define CAN_TEL_CS 44
 #define CAN_TEL_INT 46
-#define CAN_TEL_KBPS CAN_250KBPS
+#define CAN_TEL_KBPS 250000
 
 // CAN Inversor config
 #define CAN_INV_CS 4
 #define CAN_INV_INT 5
-#define CAN_INV_KBPS CAN_500KBPS
+#define CAN_INV_KBPS 500000
 #define N_DATOS_INV 5 
 
 // Conversiones inversor
 #define CONV_DC_BUS_VOLTAGE 55
 
 // Sensores config
-#define S1_ACELERACION_PIN A0
+#define S1_ACELERACION_PIN A2
 #define S2_ACELERACION_PIN A3
-#define S_FRENO_PIN A4
+#define S_FRENO_PIN A1
 
-#define SDD_SUSPENSION_PIN A6
-#define SDI_SUSPENSION_PIN A8
+#define FR_SUSPENSION_PIN A17
+#define FL_SUSPENSION_PIN A16
 
 
 // Secuencia de arranque config
-#define RTDS_PIN 31
-#define START_BUTTON_PIN 14
+#define RTDS_PIN 5
+#define START_BUTTON_PIN 6
+
+// Botones dashboard
+#define DASH_INPUT_1 35
+#define DASH_INPUT_2 34
 
 // INVERSOR
 #define INV_DATA_PERIOD 0x64 // Send data each 100 ms
@@ -104,10 +108,12 @@ INT32U ID_s2_aceleracion = 0x102;
 INT32U ID_s_freno = 0x103;
 INT32U ID_torque_total = 0x106; 
 INT32U ID_velocidad = 0x104;
-INT32U ID_sdi_suspension = 0x105;
+INT32U ID_sfr_suspension = 0x104;
+INT32U ID_sfl_suspension = 0x105;
 
 // IDs Envío Datos Inversor por el CAN_TEL
 INT32U ID_t_motor = 0x301;
 INT32U ID_t_igbt = 0x302;
 INT32U ID_t_air = 0x303;
 INT32U ID_n_actual = 0x304;
+INT32U ID_i_actual = 0x305;

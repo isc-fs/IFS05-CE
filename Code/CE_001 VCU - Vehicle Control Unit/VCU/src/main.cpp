@@ -19,9 +19,9 @@ inline void read_throtle_pedal();
 // Añadir tercer bus CAN => 1 bus para real-time telemetry 1 bus para analytics
 // Crear una libreria de CAN propia
 
-FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> CAN_INV;    // CAN Inversor
+FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> CAN_INV; // CAN Inversor
 FlexCAN_T4<CAN2, RX_SIZE_256, TX_SIZE_16> CAN_TEL; // CAN Telemetría RT
-FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> CAN_TEL_AN; // CAN Telemetría AN
+// FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> CAN_EXTRA; // CAN Extra
 
 /*
 INT8U ext = 0; // CAN_EXTID = 0：Standard data frame, based on CAN 2.0A standard. ID range: 0 ~ 0x7FF
@@ -34,8 +34,7 @@ INT8U txBuf_inv[8] = {0,0,0,0,0,0,0,0}; // Buffer para transmitir por el CAN_INV
 INT32U rxID; // ID para recibir (único para todas las recepciones) */
 
 CAN_message_t msg_inv;
-CAN_message_t msg_tel_rt;
-CAN_message_t msg_tel_an;
+CAN_message_t msg_tel;
 
 CAN_message_t msg_rx;
 
@@ -77,15 +76,14 @@ int torque_total;
 int torque_limitado;
 int media_s_acel;
 
-// Revisar normativa
-/* int flag_EV_2_3=0;
-int flag_T11_8_9=0;
-int count_T11_8_9=0;
- */
+// ------------ IMPLAUSIBILITIES --------------------
+int flag_EV_2_3 = 0;
+int flag_T11_8_9 = 0;
+int count_T11_8_9 = 0;
 
 // ---------- VARIABLES DE CONTROL DEL TIEMPO ----------
 Metro timer_send_torque_inverter = Metro(200); // Enviar consigna de par al inversor cada 200ms
-
+Metro timer_send_telemetry = Metro(400);       // Enviar telemetría por el bus
 //  ---------- PLAUSABILITY CHECKS ----------
 /* unsigned long current_time; // Guarda el valor actual de millis()
 unsigned long previous_time_inv = 0;
@@ -104,11 +102,8 @@ void setup()
 
   pinMode(S_FRENO_PIN, INPUT);
 
-  pinMode(SDD_SUSPENSION_PIN, INPUT);
-  pinMode(SDI_SUSPENSION_PIN, INPUT);
-
-  pinMode(CAN_TEL_INT, INPUT);
-  pinMode(CAN_INV_INT, INPUT);
+  pinMode(FR_SUSPENSION_PIN, INPUT);
+  pinMode(FL_SUSPENSION_PIN, INPUT);
 
   pinMode(RTDS_PIN, OUTPUT);
   pinMode(START_BUTTON_PIN, INPUT);
@@ -118,10 +113,8 @@ void setup()
 
   CAN_INV.begin();
   CAN_TEL.begin();
-  CAN_TEL_AN.begin();
-  CAN_INV.setBaudRate(250000);
-  CAN_TEL.setBaudRate(250000);
-  CAN_TEL_AN.setBaudRate(250000);
+  CAN_INV.setBaudRate(CAN_INV_KBPS);
+  CAN_TEL.setBaudRate(CAN_TEL_KBPS);
 
   // ---------- SECUENCIA DE ARRANQUE ----------
 
@@ -176,24 +169,24 @@ void setup()
 #endif
 
       // Reenviamos DC_BUS_VOLTAGE al AMS por CAN_TEL_AN
-      msg_tel_an.id = ID_dc_bus_voltage;
-      msg_tel_an.len = 2;
-      msg_tel_an.buf[0] = inv_dc_bus_voltage >> 8 & 0xFF;
-      msg_tel_an.buf[1] = inv_dc_bus_voltage & 0xFF;
-      CAN_TEL_AN.write(msg_tel_an);
+      msg_tel.id = ID_dc_bus_voltage;
+      msg_tel.len = 2;
+      msg_tel.buf[0] = inv_dc_bus_voltage >> 8 & 0xFF;
+      msg_tel.buf[1] = inv_dc_bus_voltage & 0xFF;
+      CAN_TEL.write(msg_tel);
 #if DEBUG
       Serial.println("CAN_TEL: DC_BUS_VOLTAGE enviado a AMS");
 #endif
     }
 
     // Esperamos a recibir el Ok Pre-Carga del AMS
-    if (CAN_TEL_AN.read(msg_rx))
+    if (CAN_TEL.read(msg_rx))
     {
       if (msg_rx.id == ID_ack_precarga && msg_rx.len == 1 && msg_rx.buf[0] == 0)
       {
         precarga_inv = 1; // Precarga lista
 #if DEBUG
-        Serial.println("CAN_TEL_AN: Precarga correcta. OK del AMS");
+        Serial.println("CAN_TEL_AN: Precarga correcta");
 #endif
       }
     }
@@ -202,12 +195,12 @@ void setup()
   // Comprobación ECU Telemería ON
   while (ecu_telemetria == 0)
   {
-    msg_tel_an.id = ID_ok_telemetria;
-    msg_tel_an.len = 1;
-    msg_tel_an.buf[0] = 1;
-    CAN_TEL_AN.write(msg_tel_an);
+    msg_tel.id = ID_ok_telemetria;
+    msg_tel.len = 1;
+    msg_tel.buf[0] = 1;
+    CAN_TEL.write(msg_tel);
 
-    if (CAN_TEL_AN.read(msg_rx))
+    if (CAN_TEL.read(msg_rx))
     {
       if (msg_rx.id == ID_ack_telemetria && msg_rx.len == 1 && msg_rx.buf[0] == 1)
       {
@@ -223,12 +216,12 @@ void setup()
   // Comprobación ECU Datalogger
   while (ecu_datalogger == 0)
   {
-    msg_tel_an.id = ID_ok_caja_negra;
-    msg_tel_an.len = 1;
-    msg_tel_an.buf[0] = 1;
-    CAN_TEL_AN.write(msg_tel_an);
+    msg_tel.id = ID_ok_caja_negra;
+    msg_tel.len = 1;
+    msg_tel.buf[0] = 1;
+    CAN_TEL.write(msg_tel);
 
-    if (CAN_TEL_AN.read(msg_rx))
+    if (CAN_TEL.read(msg_rx))
     {
       if (msg_rx.id == ID_ack_caja_negra && msg_rx.len == 1 && msg_rx.buf[0] == 1)
       {
@@ -399,10 +392,10 @@ void setup()
   Serial.println("RTDS apagado");
 #endif
   // Avisar a resto de ECUs de que pueden comenzar ya a mandar datos al CAN (RTD_all)
-  msg_tel_an.id = ID_RTD_all;
-  msg_tel_an.len = 1;
-  msg_tel_an.buf[0] = 1;
-  CAN_TEL_AN.write(msg_tel_an);
+  msg_tel.id = ID_RTD_all;
+  msg_tel.len = 1;
+  msg_tel.buf[0] = 1;
+  CAN_TEL.write(msg_tel);
   delay(DELAY_CAN_SEND);
 }
 
@@ -434,8 +427,193 @@ void loop()
     Serial.println(s_freno);
 #endif
 
+    // Calculamos % torque  en función de la posición de los sensores
+    s1_aceleracion_aux = (s1_aceleracion - 74) / (6.73 - 0.74);
+    s2_aceleracion_aux = (s2_aceleracion - 25) / (6.83 - 0.25);
 
+#if DEBUG
 
+    Serial.print("Sensor % 1: ");
+    Serial.print(s1_aceleracion_aux);
+    Serial.println("");
+    Serial.print("Sensor % 2: ");
+    Serial.print(s2_aceleracion_aux);
+    Serial.println("");
+#endif
 
+    // Torque enviado es la media de los dos sensores
+    torque_total = (s1_aceleracion_aux + s2_aceleracion_aux) / 2;
+
+    // Por debajo de un 10% no acelera y por encima de un 90% esta a tope
+    if (torque_total < 10)
+    {
+      torque_total = 0;
+    }
+    else if (torque_total > 90)
+    {
+      torque_total = 100;
+    }
+
+    // Revisar
+    /*     if (s1_aceleracion_aux > 7.1 && s2_aceleracion_aux > 12 && s1_aceleracion_aux < 8.6 && s2_aceleracion_aux < 20)
+        {
+          torque_total = 0;
+        } */
+
+    // Comprobamos EV 2.3 APPS/Brake Pedal Plausibility Check
+    // En caso de que se esté pisando el freno y mas de un 25% del pedal para. Se resetea
+    // solo si el acelerador vuelve por debajo del 5%
+    if (s_freno > UMBRAL_FRENO && torque_total > 25)
+    {
+      flag_EV_2_3 = 1;
+    }
+    else if (s_freno < UMBRAL_FRENO && torque_total < 5)
+    {
+      flag_EV_2_3 = 0;
+    }
+
+    // T11.8.9 Implausibility is defined as a deviation of more than ten percentage points
+    // pedal travel between any of the used APPSs
+    if (abs(s1_aceleracion_aux - s2_aceleracion_aux) > 10)
+    {
+      count_T11_8_9 = count_T11_8_9 + 1;
+      if (count_T11_8_9 * periodo_inv > 100)
+      {
+        flag_T11_8_9 = 1;
+      }
+    }
+    else
+    {
+      count_T11_8_9 = 0;
+      flag_T11_8_9 = 0;
+    }
+
+    if (flag_EV_2_3 || flag_T11_8_9)
+    {
+      torque_total = 0;
+    }
+
+#if DEBUG
+
+    Serial.print("Torque total solicitado: ");
+    Serial.println(torque_total);
+
+#endif
+
+    // Limitación del torque en función de la carga
+    if (v_celda_min < 3500)
+    {
+      if (v_celda_min > 2800)
+      {
+        torque_limitado = torque_total * (1.357 * v_celda_min - 3750) / 1000;
+      }
+      else
+      {
+        torque_limitado = torque_total * 0.05;
+      }
+    }
+    else
+    {
+      torque_limitado = torque_total;
+    }
+
+#if DEBUG
+    Serial.print("Torque limitado en: ");
+    Serial.println(torque_limitado);
+
+#endif
+
+    // Envío de torque al inversor
+
+    msg_inv.id = rxID_inversor;
+    msg_inv.len = 3;
+    msg_inv.buf[0] = TORQUE;
+    msg_inv.buf[1] = ((int)(torque_limitado * 32767.0 / 100.0)) & 0xFF; // bits del 0-7
+    msg_inv.buf[2] = ((int)(torque_limitado * 32767.0 / 100.0)) >> 8;   // bits del 8-15
+    CAN_INV.write(msg_inv);
+
+    // Enviar telemetría aceleración y freno
+
+    msg_tel.id = ID_torque_total;
+    msg_tel.len = 2;
+    msg_tel.buf[0] = ((int)torque_limitado) >> 8;
+    msg_tel.buf[1] = ((int)torque_limitado);
+    CAN_TEL.write(msg_tel);
+
+    msg_tel.id = ID_s_freno;
+    msg_tel.len = 2;
+    msg_tel.buf[0] = ((int)s_freno_aux) >> 8;
+    msg_tel.buf[1] = ((int)s_freno_aux);
+    CAN_TEL.write(msg_tel);
+  }
+
+  if (timer_send_telemetry.check())
+  {
+
+    while (CAN_INV.read(msg_rx))
+    {
+      if (msg_rx.id == txID_inversor)
+      {
+        switch (msg_rx.buf[0])
+        {
+        case DC_BUS_VOLTAGE:
+          msg_tel.id = ID_dc_bus_voltage;
+          msg_tel.len = 2;
+          inv_dc_bus_voltage = ((int)msg_rx.buf[2] << 8 | (int)msg_rx.buf[1]) / CONV_DC_BUS_VOLTAGE;
+          msg_tel.buf[0] = inv_dc_bus_voltage >> 8 & 0xFF;
+          msg_tel.buf[1] = inv_dc_bus_voltage & 0xFF;
+          CAN_TEL.write(msg_tel);
+          break;
+
+        case T_MOTOR:
+          msg_tel.id = ID_t_motor;
+          msg_tel.len = 2;
+          msg_tel.buf[0] = msg_rx.buf[2];
+          msg_tel.buf[1] = msg_rx.buf[1];
+          CAN_TEL.write(msg_tel);
+          break;
+
+        case T_IGBT:
+          msg_tel.id = ID_t_igbt;
+          msg_tel.len = 2;
+          msg_tel.buf[0] = msg_rx.buf[2];
+          msg_tel.buf[1] = msg_rx.buf[1];
+          CAN_TEL.write(msg_tel);
+          break;
+
+        case T_AIR:
+          msg_tel.id = ID_t_air;
+          msg_tel.len = 2;
+          msg_tel.buf[0] = msg_rx.buf[2];
+          msg_tel.buf[1] = msg_rx.buf[1];
+          CAN_TEL.write(msg_tel);
+          break;
+
+        case N_ACTUAL:
+          msg_tel.id = ID_n_actual;
+          msg_tel.len = 2;
+          msg_tel.buf[0] = msg_rx.buf[2];
+          msg_tel.buf[1] = msg_rx.buf[1];
+          CAN_TEL.write(msg_tel);
+
+          msg_tel.id = ID_velocidad;
+          msg_tel.len = 2;
+          aux_velocidad = ((msg_rx.buf[2] << 8) | msg_rx.buf[1]);
+          aux_velocidad = aux_velocidad * 0.02185455759;
+          msg_tel.buf[0] = (int)aux_velocidad >> 8;
+          msg_tel.buf[1] = (int)aux_velocidad;
+          CAN_TEL.write(msg_tel);
+          break;
+
+        case I_ACTUAL:
+          msg_tel.id = ID_i_actual;
+          msg_tel.len = 2;
+          msg_tel.buf[0] = msg_rx.buf[2];
+          msg_tel.buf[1] = msg_rx.buf[1];
+          CAN_TEL.write(msg_tel);
+          break;
+        }
+      }
+    }
   }
 }
